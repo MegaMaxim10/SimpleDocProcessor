@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 /**
  *
@@ -27,6 +30,7 @@ public class SimpleDocProcessor {
     static {
         DEFAULT_GLOBAL_CONF.getGlobalConfiguration().put("confFileName", "doc.conf.json");
         DEFAULT_GLOBAL_CONF.getGlobalConfiguration().put("docFileName", "readme.md");
+        DEFAULT_GLOBAL_CONF.getGlobalConfiguration().put("applicationName", "Another Application");
         DEFAULT_GLOBAL_CONF.getExcludedFolders().add("node_modules");
         DEFAULT_GLOBAL_CONF.getExcludedFolders().add("doc");
         DEFAULT_GLOBAL_CONF.getExcludedFolders().add("dist");
@@ -173,11 +177,30 @@ public class SimpleDocProcessor {
                 System.out.println("[ERROR] Unexpected error when writing the documentation ouput!");
                 return;
             }
+            
+            System.out.println("[INFO] SUCCESSFUL! GOOD JOB!");
+            if (SimpleDocProcessor.isArg(args, "--html")) {
+                System.out.println("[INFO] Converting to HTML...");
+                Parser parser = Parser.builder().build();
+                Node document = parser.parse(content);
+                HtmlRenderer renderer = HtmlRenderer.builder().build();
+                String html = renderer.render(document);
+                html = "<html><head><title>Documentation of " + globalConf.getGlobalConfiguration().get("applicationName") + "</title></head><body>" + html + "</body></html>";
+                System.out.println("[INFO] Writing the html ouput...");
+                try{
+                    FileWriter myWriter = new FileWriter("doc/dist/Documentation.html");
+                    myWriter.write(html);
+                    myWriter.close();
+                }catch (Exception e) {
+                    System.out.println("[ERROR] Unexpected error when writing the html ouput!");
+                    return;
+                }
+                System.out.println("[INFO] SUCCESSFULLY converted!");
+            }
         } catch (Exception ex) {
             System.out.println("[ERROR] Unexpected error: cannot generate the documentation.");
             return;
         }
-        System.out.println("[INFO] SUCCESSFUL! GOOD JOB!");
     }
     
     private static DocConf mergeConfigurations(DocConf conf1, DocConf conf2) {
