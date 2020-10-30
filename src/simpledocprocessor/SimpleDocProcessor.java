@@ -122,6 +122,7 @@ public class SimpleDocProcessor {
             file = new File("doc/Documentation.md");
             File folder = file.getParentFile();
             DocConf globalConf = DocConf.getFromFile("doc/doc.conf.json");
+            globalConf = SimpleDocProcessor.mergeConfigurations(DEFAULT_GLOBAL_CONF, globalConf != null ? globalConf : new DocConf());
             Output output = new Output();
             output.setOutputDir(new File("doc/dist"));
             String content = DocUtils.getFileContent("doc/dist/Documentation.md");
