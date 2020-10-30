@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package simpledocprocessor;
+package com.miu.smart.devtools.simpledocprocessor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
