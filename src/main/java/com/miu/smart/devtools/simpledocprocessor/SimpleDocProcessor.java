@@ -240,7 +240,7 @@ public class SimpleDocProcessor {
         return finalConf;
     }
     
-    private static String getDocContent(File folder, DocConf globalConf, Output output) {
+    private static String getDocContent(File folder, DocConf globalConf, Output output) throws IOException {
         if (folder != null && folder.isDirectory() && folder.canRead() && !globalConf.getExcludedFolders().contains(folder.getName())) {
             String content = "";
             String localConfPath = folder.getAbsolutePath() + File.separator + globalConf.getGlobalConfiguration().get("confFileName");
@@ -287,9 +287,27 @@ public class SimpleDocProcessor {
                 System.out.println("[Warning] Image could not be treated while processing " + docPath);
             }
             
+            ArrayList<String> listDirProc = new ArrayList<>();
+            for (String dirName : mergedConf.getFolderPriority()) {
+                if (!dirName.contains("/") && !dirName.contains("\\") && !dirName.contains(File.separator)) {
+                    String dirPath = folder.getAbsolutePath() + File.separator + dirName;
+                    File file = new File(dirPath);
+                    if (file.exists() && file.isDirectory()) {
+                        String subContent = SimpleDocProcessor.getDocContent(file, mergedConf, output);
+                        if (subContent != null) {
+                            if (content.trim().isEmpty())
+                                content = subContent;
+                            else
+                                content += (System.lineSeparator() + subContent);
+                        }
+                        listDirProc.add(file.getCanonicalPath());
+                    }
+                }
+            }
+            
             File filesList[] = folder.listFiles();
             for(File file : filesList) {
-                if (file.isDirectory()) {
+                if (file.isDirectory() && !listDirProc.contains(file.getCanonicalPath())) {
                     String subContent = SimpleDocProcessor.getDocContent(file, mergedConf, output);
                     if (subContent != null) {
                         if (content.trim().isEmpty())
