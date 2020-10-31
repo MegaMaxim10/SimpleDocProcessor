@@ -27,6 +27,16 @@ import org.commonmark.renderer.html.HtmlRenderer;
  */
 public class SimpleDocProcessor {
     private static final DocConf DEFAULT_GLOBAL_CONF = new DocConf();
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+    
     static {
         DEFAULT_GLOBAL_CONF.getGlobalConfiguration().put("confFileName", "doc.conf.json");
         DEFAULT_GLOBAL_CONF.getGlobalConfiguration().put("docFileName", "readme.md");
@@ -47,7 +57,7 @@ public class SimpleDocProcessor {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.println("[INFO] Checking requirements for file generation...");
+        System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Checking requirements for file generation...");
         File file = new File("doc");
         boolean init = SimpleDocProcessor.isArg(args, "-i");
         if (!file.exists() || !file.canRead() || !file.canWrite()) {
@@ -67,11 +77,11 @@ public class SimpleDocProcessor {
                     myWriter.write(DEFAULT_GLOBAL_CONF.toJson());
                     myWriter.close();
                 } catch (IOException e) {
-                    System.out.println("[ERROR] Unexpected error when creating the basic documentation folder!");
+                    System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error when creating the basic documentation folder!");
                     return;
                 }
             } else {
-                System.out.println("[ERROR] Missing readable and writable doc folder! Create it manually and configure it or use the -i argument to automatically generate such a basic folder!");
+                System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Missing readable and writable doc folder! Create it manually and configure it or use the -i argument to automatically generate such a basic folder!");
                 return;
             }
         } else {
@@ -84,7 +94,7 @@ public class SimpleDocProcessor {
                             myWriter.write("{{PrintDocumentationHere}}");
                         }
                     }catch (IOException e) {
-                        System.out.println("[ERROR] Unexpected error when creating the basic documentation file!");
+                        System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error when creating the basic documentation file!");
                         return;
                     }
                 }
@@ -99,7 +109,7 @@ public class SimpleDocProcessor {
                             myWriter.write(DEFAULT_GLOBAL_CONF.toJson());
                         }
                     }catch (IOException e) {
-                        System.out.println("[ERROR] Unexpected error when creating the basic configuration file!");
+                        System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error when creating the basic configuration file!");
                         return;
                     }
                 }
@@ -107,18 +117,18 @@ public class SimpleDocProcessor {
         }
         file = new File("doc/dist/");
         if (file.exists()) {
-            System.out.println("[INFO] Cleaning generation folder...");
+            System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Cleaning generation folder...");
             DocUtils.deleteFolder(file);
         }
         file = new File("doc/dist/images");
         file.mkdirs();
-        System.out.println("[INFO] Scanning the project folder to generate the documentation...");
+        System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Scanning the project folder to generate the documentation...");
         Path copied = Paths.get("doc/dist/Documentation.md");
         Path originalPath = Paths.get("doc/Documentation.md");
         try {
             Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ex) {
-            System.out.println("[ERROR] Unexpected error: cannot copy the basic documentation file.");
+            System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error: cannot copy the basic documentation file.");
             return;
         }
         
@@ -158,7 +168,7 @@ public class SimpleDocProcessor {
                     Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
                     output.getCopiedImages().add(new File(destPath).getCanonicalPath());
                 } else {
-                    System.out.println("[Warning] The specified image is not found: " + imgLine + " in file " + file.getCanonicalPath());
+                    System.out.println("[" + ANSI_YELLOW + "WARNING" + ANSI_RESET + "] The specified image is not found: " + imgLine + " in file " + file.getCanonicalPath());
                 }
                 content = content.replace(imgLine, "![" + destRel.replace('\\', '/') + "](" + destRel.replace('\\', '/') + ")");
             }
@@ -168,33 +178,33 @@ public class SimpleDocProcessor {
             if (docContent == null)
                 throw new Exception();
             content = content.replace("{{PrintDocumentationHere}}", docContent);
-            System.out.println("[INFO] Writing the documentation ouput...");
+            System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Writing the documentation ouput...");
             try (FileWriter myWriter = new FileWriter("doc/dist/Documentation.md")) {
                 myWriter.write(content);
             }catch (IOException e) {
-                System.out.println("[ERROR] Unexpected error when writing the documentation ouput!");
+                System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error when writing the documentation ouput!");
                 return;
             }
             
-            System.out.println("[INFO] SUCCESSFUL! GOOD JOB!");
+            System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] " + ANSI_GREEN + "SUCCESSFUL! GOOD JOB" + ANSI_RESET + "!");
             if (SimpleDocProcessor.isArg(args, "--html")) {
-                System.out.println("[INFO] Converting to HTML...");
+                System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Converting to HTML...");
                 Parser parser = Parser.builder().build();
                 Node document = parser.parse(content);
                 HtmlRenderer renderer = HtmlRenderer.builder().build();
                 String html = renderer.render(document);
                 html = "<html><head><title>Documentation of " + globalConf.getGlobalConfiguration().get("applicationName") + "</title></head><body>" + html + "</body></html>";
-                System.out.println("[INFO] Writing the html ouput...");
+                System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] Writing the html ouput...");
                 try (FileWriter myWriter = new FileWriter("doc/dist/Documentation.html")) {
                     myWriter.write(html);
                 }catch (Exception e) {
-                    System.out.println("[ERROR] Unexpected error when writing the html ouput!");
+                    System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error when writing the html ouput!");
                     return;
                 }
-                System.out.println("[INFO] SUCCESSFULLY converted!");
+                System.out.println("[" + ANSI_BLUE + "INFO" + ANSI_RESET + "] " + ANSI_GREEN + "SUCCESSFULLY converted" + ANSI_RESET + "!");
             }
         } catch (Exception ex) {
-            System.out.println("[ERROR] Unexpected error: cannot generate the documentation.");
+            System.out.println("[" + ANSI_RED + "ERROR" + ANSI_RESET + "] Unexpected error: cannot generate the documentation.");
         }
     }
     
@@ -277,14 +287,14 @@ public class SimpleDocProcessor {
                         Files.copy(originalPath, copied, StandardCopyOption.REPLACE_EXISTING);
                         output.getCopiedImages().add(new File(destPath).getCanonicalPath());
                     } else {
-                        System.out.println("[Warning] The specified image is not found: " + imgLine + " in file " + docPath);
+                        System.out.println("[" + ANSI_YELLOW + "WARNING" + ANSI_RESET + "] The specified image is not found: " + imgLine + " in file " + docPath);
                     }
                     content = content.replace(imgLine, "![" + destRel.replace('\\', '/') + "](" + destRel.replace('\\', '/') + ")");
                 }
             } catch (FileNotFoundException ex) {
-                System.out.println("[Warning] File not found while processing " + docPath);
+                System.out.println("[" + ANSI_YELLOW + "WARNING" + ANSI_RESET + "] File not found while processing " + docPath);
             } catch (IOException ex) {
-                System.out.println("[Warning] Image could not be treated while processing " + docPath);
+                System.out.println("[" + ANSI_YELLOW + "WARNING" + ANSI_RESET + "] Image could not be treated while processing " + docPath);
             }
             
             ArrayList<String> listDirProc = new ArrayList<>();
