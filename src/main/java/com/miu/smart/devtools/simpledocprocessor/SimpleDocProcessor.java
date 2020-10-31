@@ -66,7 +66,7 @@ public class SimpleDocProcessor {
                     myWriter = new FileWriter("doc/doc.conf.json");
                     myWriter.write(DEFAULT_GLOBAL_CONF.toJson());
                     myWriter.close();
-                } catch (Exception e) {
+                } catch (IOException e) {
                     System.out.println("[ERROR] Unexpected error when creating the basic documentation folder!");
                     return;
                 }
@@ -80,10 +80,10 @@ public class SimpleDocProcessor {
                 if (init) {
                     try{
                         file.createNewFile();
-                        FileWriter myWriter = new FileWriter("doc/Documentation.md");
-                        myWriter.write("{{PrintDocumentationHere}}");
-                        myWriter.close();
-                    }catch (Exception e) {
+                        try (FileWriter myWriter = new FileWriter("doc/Documentation.md")) {
+                            myWriter.write("{{PrintDocumentationHere}}");
+                        }
+                    }catch (IOException e) {
                         System.out.println("[ERROR] Unexpected error when creating the basic documentation file!");
                         return;
                     }
@@ -95,10 +95,10 @@ public class SimpleDocProcessor {
                 if (init) {
                     try{
                         file.createNewFile();
-                        FileWriter myWriter = new FileWriter("doc/doc.conf.json");
-                        myWriter.write(DEFAULT_GLOBAL_CONF.toJson());
-                        myWriter.close();
-                    }catch (Exception e) {
+                        try (FileWriter myWriter = new FileWriter("doc/doc.conf.json")) {
+                            myWriter.write(DEFAULT_GLOBAL_CONF.toJson());
+                        }
+                    }catch (IOException e) {
                         System.out.println("[ERROR] Unexpected error when creating the basic configuration file!");
                         return;
                     }
@@ -169,11 +169,9 @@ public class SimpleDocProcessor {
                 throw new Exception();
             content = content.replace("{{PrintDocumentationHere}}", docContent);
             System.out.println("[INFO] Writing the documentation ouput...");
-            try{
-                FileWriter myWriter = new FileWriter("doc/dist/Documentation.md");
+            try (FileWriter myWriter = new FileWriter("doc/dist/Documentation.md")) {
                 myWriter.write(content);
-                myWriter.close();
-            }catch (Exception e) {
+            }catch (IOException e) {
                 System.out.println("[ERROR] Unexpected error when writing the documentation ouput!");
                 return;
             }
@@ -187,10 +185,8 @@ public class SimpleDocProcessor {
                 String html = renderer.render(document);
                 html = "<html><head><title>Documentation of " + globalConf.getGlobalConfiguration().get("applicationName") + "</title></head><body>" + html + "</body></html>";
                 System.out.println("[INFO] Writing the html ouput...");
-                try{
-                    FileWriter myWriter = new FileWriter("doc/dist/Documentation.html");
+                try (FileWriter myWriter = new FileWriter("doc/dist/Documentation.html")) {
                     myWriter.write(html);
-                    myWriter.close();
                 }catch (Exception e) {
                     System.out.println("[ERROR] Unexpected error when writing the html ouput!");
                     return;
@@ -199,7 +195,6 @@ public class SimpleDocProcessor {
             }
         } catch (Exception ex) {
             System.out.println("[ERROR] Unexpected error: cannot generate the documentation.");
-            return;
         }
     }
     

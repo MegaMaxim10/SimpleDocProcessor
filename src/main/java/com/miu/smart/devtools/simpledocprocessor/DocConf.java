@@ -114,10 +114,9 @@ public class DocConf {
     }
     
     public String toJson() {
-        String json = null;
     	final GsonBuilder builder = new GsonBuilder();
         final Gson gson = builder.create();
-        json = gson.toJson(this, DocConf.class);
+        String json = gson.toJson(this, DocConf.class);
     	return json;
     }
 }
